@@ -1,0 +1,1 @@
+Synthetic contract fixtures; addresses identify real public mints only as valid base58 examples, not wallet recommendations. Trades and PnL are entirely invented.

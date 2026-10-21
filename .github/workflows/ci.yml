@@ -1,0 +1,41 @@
+name: Offline checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.10', '3.12']
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Reject tracked runtime data and credential files
+        run: python scripts/check_repository.py
+      - name: Unit and fixture integration tests (no API credentials)
+        run: python -m unittest discover -s tests -q
+      - name: Fresh checkout status and offline setup
+        run: |
+          python master.py status
+          python master.py init
+          python master.py demo
+          python master.py status
+      - name: Ensure checks did not modify tracked source
+        run: git diff --exit-code

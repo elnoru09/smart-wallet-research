@@ -1,0 +1,11 @@
+{
+  "code": "0",
+  "data": [
+    {
+      "walletAddress": "So11111111111111111111111111111111111111112",
+      "realizedPnlUsd": "50",
+      "winRatePercent": "60"
+    }
+  ],
+  "msg": ""
+}

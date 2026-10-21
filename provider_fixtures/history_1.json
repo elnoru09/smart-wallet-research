@@ -1,0 +1,20 @@
+{
+  "code": "0",
+  "data": {
+    "transactionList": [
+      {
+        "type": "1",
+        "chainIndex": "501",
+        "tokenContractAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "valueUsd": "20",
+        "amount": "100",
+        "price": "0.2",
+        "marketCap": "5500",
+        "pnlUsd": "0",
+        "time": "1791763200000"
+      }
+    ],
+    "cursor": "next-fixture"
+  },
+  "msg": ""
+}

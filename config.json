@@ -1,0 +1,14 @@
+{
+  "version": "0.3.0",
+  "chain": "solana",
+  "primary_entry_mc_usd": 10000,
+  "secondary_entry_mc_usd": 6000,
+  "minimum_hold_days": null,
+  "minimum_win_rate": null,
+  "minimum_episodes_for_description": 20,
+  "max_quote_age_seconds": 900,
+  "per_token_budget_usd": 20,
+  "copy_fraction": null,
+  "execution_enabled": false,
+  "mode": "research_only"
+}
