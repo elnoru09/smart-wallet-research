@@ -5,7 +5,7 @@ Satu repository, satu workspace lokal, satu backlog. Milestone bukan paket ZIP t
 | Milestone | Hasil | Kriteria selesai | Status |
 |---|---|---|---|
 | M0 | Fondasi Git, fixture, status awal, importer legacy, CI | Clone kosong dapat dipakai offline; data/secret tidak dilacak; konflik import tidak ditimpa; baseline lulus | Implementasi tersedia pada 0.3.0; hasil CI ditampilkan di Actions |
-| M1 | SQLite, lineage, coverage, dashboard status awal | Impor idempoten; raw lama utuh; data partial tetap partial; backup/restore diuji | Berikutnya |
+| M1 | SQLite, lineage, coverage, dashboard status awal | Impor idempoten; raw lama utuh; data partial tetap partial; backup/restore diuji | Implementasi offline 0.3.1; verifikasi CI dan impor laptop pada commit baru diperlukan |
 | M2 | Backfill/catch-up terpisah dan scheduler | Checkpoint, gap, restart dan budget diuji; canary live lokal cocok | Direncanakan |
 | M3 | Lot/episode, saldo, fee dan profil | Transfer, oversell, missing basis dan partial exit diuji; metrik mempunyai coverage | Direncanakan |
 | M4 | Dashboard detail dan notifikasi | Wallet→posisi→bukti dapat ditelusuri; refresh UI tidak memicu backfill; outbox terdeduplikasi | Direncanakan |
@@ -21,13 +21,15 @@ Di M3, metode FIFO yang terversi akan dibedakan dari baseline average-cost dalam
 
 ## Backlog dekat
 
-1. SW-003: schema SQLite berversi dan backup/restore.
-2. SW-004: import registry, raw dan observasi dengan provenance serta deduplikasi yang tepat.
-3. SW-005: dashboard status read-only dari data lokal.
+1. SW-003: schema SQLite 1 dan verified backup/restore ke file terpisah tersedia pada 0.3.1.
+2. SW-004: arsip registry, raw dan observasi lama tersedia; hash payload tidak diklaim sebagai event on-chain.
+3. SW-005: dashboard status HTML read-only dari SQLite tersedia; pembaruan lewat db-import.
 4. SW-006: job/checkpoint dan budget global.
 5. SW-007: adapter OKX untuk backfill/catch-up.
 
 Spike adapter GMGN berjalan setelah kontrak penyimpanan tersedia; tidak menghambat pipeline offline. Ketersediaan akses, auth, kuota dan makna field perlu diuji memakai kredensial lokal. Skor upstream tidak menjadi skor otomatis sistem ini.
+
+M1 mempertahankan jalur tulis legacy JSON. Database adalah arsip snapshot eksplisit; status tidak memicu impor atau HTTP. M2 menghubungkan worker/checkpoint ke penyimpanan ini secara bertahap. Rincian operasi dan batas ada di [SQLITE_M1.md](SQLITE_M1.md).
 
 ## Definisi penelitian
 

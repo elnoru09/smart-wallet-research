@@ -3,6 +3,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import sqlite3
 import subprocess
 import sys
 import uuid
@@ -10,6 +11,7 @@ import webbrowser
 import zipfile
 
 from okx_reader import IntakeError
+from research_store import StorageError
 
 ROOT = Path(__file__).resolve().parent
 
@@ -67,6 +69,9 @@ def status(root=ROOT):
     if (Path(root)/'watchlist/registry.json').is_file():
         import wallet_registry
         info['registry_summary'] = wallet_registry.summary(wallet_registry.load(root))
+    if (Path(root)/'data/research.sqlite3').exists():
+        from research_store import database_status
+        info['database_summary'] = database_status(root)
     print(json.dumps(info, indent=2, ensure_ascii=False))
     return info
 
@@ -173,6 +178,20 @@ def add_wallets(root=ROOT):
     print(str(count)+' wallet baru ditambahkan. Buka menu 5 untuk melihat daftar.')
 
 
+def database_action(command, root=ROOT, backup=None):
+    import research_store as store
+    if command == 'db-import': result = store.import_workspace(root)
+    elif command == 'db-status': result = store.database_status(root)
+    elif command == 'db-backup': result = store.backup_database(root)
+    elif command == 'db-restore': result = store.restore_database(root, backup)
+    elif command == 'db-dashboard':
+        result = store.dashboard(root)
+        webbrowser.open(Path(result['path']).as_uri())
+    else: raise ProjectError('Unknown database command')
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+    return result
+
+
 def menu(root=ROOT):
     while True:
         print('\nSMART WALLET RESEARCH · MASTER')
@@ -187,6 +206,9 @@ def menu(root=ROOT):
         print('9. Sinkronkan antrean otomatis + ekspor (maksimal 50 request)')
         print('10. Siapkan workspace lokal (offline)')
         print('11. Jalankan demo sintetis (offline, tanpa API)')
+        print('12. Impor/perbarui arsip SQLite (offline)')
+        print('13. Buka dashboard status SQLite (offline)')
+        print('14. Backup SQLite dan verifikasi (offline)')
         print('0. Keluar')
         try:
             choice = input('Pilih menu: ').strip()
@@ -202,9 +224,12 @@ def menu(root=ROOT):
             elif choice == '9': registry_action('sync', root)
             elif choice == '10': initialize(root)
             elif choice == '11': demo(root)
-            else: print('Pilih angka 0 sampai 11.')
-        except (ProjectError, IntakeError, OSError, ValueError, KeyError) as exc:
-            print('BELUM BERHASIL: '+(str(exc) if isinstance(exc, (ProjectError, IntakeError)) else type(exc).__name__))
+            elif choice == '12': database_action('db-import', root)
+            elif choice == '13': database_action('db-dashboard', root)
+            elif choice == '14': database_action('db-backup', root)
+            else: print('Pilih angka 0 sampai 14.')
+        except (ProjectError, IntakeError, StorageError, sqlite3.Error, OSError, ValueError, KeyError) as exc:
+            print('BELUM BERHASIL: '+(str(exc) if isinstance(exc, (ProjectError, IntakeError, StorageError)) else type(exc).__name__))
         except (EOFError, KeyboardInterrupt):
             print('\nMenu ditutup.'); return 0
 
@@ -213,16 +238,20 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command', nargs='?', choices=['status', 'report', 'continue-history', 'export-review',
                                                     'wallets', 'collect-wallets', 'discover-wallets', 'add-wallet', 'sync',
-                                                    'init', 'demo', 'import-legacy'])
+                                                    'init', 'demo', 'import-legacy', 'db-import', 'db-status',
+                                                    'db-dashboard', 'db-backup', 'db-restore'])
     parser.add_argument('--max-requests',type=int,default=50)
     parser.add_argument('--source', help='Folder master lama untuk import-legacy')
     parser.add_argument('--include-env', action='store_true', help='Salin .env lokal tanpa mengganti file yang berbeda')
     parser.add_argument('--dry-run', action='store_true', help='Periksa rencana import tanpa menulis berkas')
+    parser.add_argument('--backup', help='Path backup relatif terhadap workspace, untuk db-restore')
     args = parser.parse_args()
     if args.command == 'import-legacy' and not args.source:
         parser.error('import-legacy requires --source')
     if args.command != 'import-legacy' and (args.source or args.include_env or args.dry_run):
         parser.error('--source, --include-env and --dry-run are only valid for import-legacy')
+    if (args.command == 'db-restore') != bool(args.backup):
+        parser.error('db-restore requires --backup; --backup is only valid for db-restore')
     try:
         if args.command is None: return menu()
         if args.command == 'status': status()
@@ -236,6 +265,7 @@ def main():
         elif args.command == 'sync': return registry_action('sync',max_requests=args.max_requests)
         elif args.command == 'init': initialize()
         elif args.command == 'demo': demo()
+        elif args.command.startswith('db-'): database_action(args.command, backup=args.backup)
         elif args.command == 'import-legacy':
             from workspace_transfer import import_legacy, WorkspaceImportError
             try:
@@ -244,8 +274,8 @@ def main():
                 raise ProjectError(str(exc)) from None
             print(json.dumps(result, indent=2))
         return 0
-    except (ProjectError, IntakeError, OSError, ValueError, KeyError) as exc:
-        print('BELUM BERHASIL: '+(str(exc) if isinstance(exc, (ProjectError, IntakeError)) else type(exc).__name__))
+    except (ProjectError, IntakeError, StorageError, sqlite3.Error, OSError, ValueError, KeyError) as exc:
+        print('BELUM BERHASIL: '+(str(exc) if isinstance(exc, (ProjectError, IntakeError, StorageError)) else type(exc).__name__))
         return 2
 
 

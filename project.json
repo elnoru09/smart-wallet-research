@@ -1,6 +1,6 @@
 {
   "project": "Smart Wallet Research",
-  "code_version": "0.3.0",
+  "code_version": "0.3.1",
   "master_layout_version": 1,
   "source_run": "runs/okx_002",
   "diagnosis": "runs/history_diagnosis_003.json",

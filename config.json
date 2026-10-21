@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.3.1",
   "chain": "solana",
   "primary_entry_mc_usd": 10000,
   "secondary_entry_mc_usd": 6000,

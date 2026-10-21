@@ -2,7 +2,7 @@
 
 Riset perilaku wallet Solana: entry low cap, holding, posisi terbuka/rugi, dan kelayakan mengikuti wallet setelah biaya. **Research only. Eksekusi transaksi nyata nonaktif.**
 
-Versi kode **0.3.0 — M0: fondasi Git dan workspace lokal**. Kode dan fixture sintetis ada di Git. Kredensial, watchlist dan hasil pengumpulan tetap lokal.
+Versi kode **0.3.1 — M1: arsip SQLite dan status lokal**. Kode dan fixture sintetis ada di Git. Kredensial, watchlist dan hasil pengumpulan tetap lokal.
 
 ## Mulai dari clone baru
 
@@ -49,6 +49,11 @@ Demo menyimpan laporan sintetis terpisah di `runs/demo_<id>/`. Output mencantumk
 | `py master.py wallets` | Membuka daftar kandidat lokal; offline |
 | `py master.py report` | Membuka laporan riset aktif jika tersedia |
 | `py master.py demo` | Contoh sintetis terpisah; offline |
+| `py master.py db-import` | Mengarsipkan registry/raw/laporan ke SQLite; impor ulang idempoten, offline |
+| `py master.py db-status` | Ringkasan snapshot SQLite; offline dan read-only |
+| `py master.py db-dashboard` | Membuka snapshot HTML status dari SQLite; offline |
+| `py master.py db-backup` | Backup SQLite dengan verifikasi integritas dan hash byte sumber |
+| `py master.py db-restore --backup <path-relatif>` | Memulihkan backup ke file baru; database aktif tetap utuh |
 | `py master.py import-legacy --source <folder>` | Menyalin runtime data lama tanpa mengganti konflik |
 | `py master.py add-wallet` | Menambah alamat manual |
 | `py master.py discover-wallets` | Discovery OKX terbatas maksimal dua request; memerlukan kredensial |
@@ -56,6 +61,12 @@ Demo menyimpan laporan sintetis terpisah di `runs/demo_<id>/`. Output mencantumk
 | `py master.py export-review` | Ekspor audit lokal bila diperlukan; bukan cara memperbarui kode |
 
 Sinkronisasi legacy mempertahankan window historis dari run sumber, satu halaman per wallet dan checkpoint per wallet. Ini **belum pemantauan transaksi terbaru**. Pada checkout baru yang belum mengimpor run sumber, pengambilan history berhenti dengan `HISTORY_WINDOW_REQUIRED` sebelum mengirim request. Discovery dan demo dapat dipakai tanpa run sumber itu.
+
+## Arsip SQLite setelah migrasi
+
+Hentikan collector, kemudian jalankan `py master.py db-import`. Jalankan lagi: bila sumber sama, `artifacts_added` dan `payloads_added` harus nol. `py master.py db-dashboard` membuka status lokal yang membedakan total registry, payload provider berbeda dan hasil batch terakhir. Riwayat parsial tetap parsial; payload hash bukan identitas transaksi on-chain.
+
+Setelah pengumpulan baru, ulangi `db-import` untuk memperbarui arsip. Pengumpul legacy masih menulis JSON. Lihat [operasi, arti jumlah dan pemulihan SQLite](docs/SQLITE_M1.md). Database, HTML dan backup berada di data/ dan diabaikan Git; jangan membagikannya sebagai source.
 
 ## Kredensial lokal
 
@@ -88,8 +99,8 @@ Jika ada edit source lokal atau branch divergen, review dahulu; jangan melakukan
 
 ## Peta pengembangan
 
-[Roadmap](docs/ROADMAP.md) mengarahkan M1 penyimpanan SQLite, M2 backfill/catch-up, M3 rekonstruksi posisi, M4 dashboard/notifikasi, dan M5 paper evaluation. Dashboard web, integrasi GMGN, dan paper portfolio **belum diimplementasikan** pada M0.
+[Roadmap](docs/ROADMAP.md) mengarahkan M2 backfill/catch-up, M3 rekonstruksi posisi, M4 dashboard detail/notifikasi, dan M5 paper evaluation. M1 menyediakan SQLite dan dashboard status HTML offline. Server web, integrasi GMGN, dan paper portfolio **belum diimplementasikan**.
 
 Minimum hold dan minimum win rate tetap tidak ditetapkan. Contoh 10 hari bukan aturan final. Anggaran US$20/token adalah rencana simulasi; proporsi 20% dan total modal perlu didefinisikan sebelum eksperimen portofolio. Data parsial tidak digunakan untuk menyatakan win rate atau posisi sangkut terverifikasi.
 
-Lihat [protokol penelitian](docs/RESEARCH_PROTOCOL.md), [kontrak data](docs/DATA_CONTRACT.md), [kurasi sumber](docs/UPSTREAM_REFERENCES.md), dan [validasi M0](docs/QA_M0.md).
+Lihat [protokol penelitian](docs/RESEARCH_PROTOCOL.md), [kontrak data](docs/DATA_CONTRACT.md), [kurasi sumber](docs/UPSTREAM_REFERENCES.md), [validasi M0](docs/QA_M0.md), dan [validasi M1](docs/QA_M1.md).

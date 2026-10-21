@@ -48,7 +48,7 @@ class ConnectorTests(unittest.TestCase):
         self.assertEqual(cl.requests,0)
 
     def test_missing_credentials_no_values_printed(self):
-        with patch.dict('os.environ',{},clear=True):
+        with patch.dict('os.environ',{},clear=True), patch('okx_reader.dotenv_values',return_value={}):
             with self.assertRaisesRegex(IntakeError,'CREDENTIALS_MISSING'):credentials()
 
     def test_auth_failure_does_not_leak_body(self):
@@ -199,7 +199,7 @@ class ConnectorTests(unittest.TestCase):
             observation(row,dict(received_at=FIXED,params={'begin':'0','end':'9999999999999'}),ADDRESS,1)
 
     def test_noninteractive_prompt_rejected(self):
-        with patch('sys.stdin.isatty',return_value=False):
+        with patch.dict('os.environ',{},clear=True), patch('okx_reader.dotenv_values',return_value={}), patch('sys.stdin.isatty',return_value=False):
             with self.assertRaisesRegex(IntakeError,'PROMPT_REQUIRES_TERMINAL'):credentials(prompt=True)
 
 
