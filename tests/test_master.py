@@ -14,7 +14,7 @@ import master
 
 class MasterTests(unittest.TestCase):
     def setup_project(self, base):
-        root=base/'master with spaces';root.mkdir()
+        root=base.resolve()/'master with spaces';root.mkdir()
         cfg=dict(project='Smart Wallet Research',code_version='0.2.4',source_run='runs/old',
                  diagnosis='runs/diagnosis.json',baseline_report='runs/700',followup_run='runs/continued',exports='exports')
         (root/'project.json').write_text(json.dumps(cfg))
